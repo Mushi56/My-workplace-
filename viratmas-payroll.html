@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Viratmas Payroll</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#07090f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Viratmas Pay">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#07090f;--s1:#0d1018;--s2:#12151f;--s3:#181c28;--s4:#1e2330;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
+  --gold:#c8a84b;--gold2:#f0cd79;--gold3:#8a6a1e;--gold-glow:rgba(200,168,75,0.15);
+  --green:#3dd68c;--green-bg:rgba(61,214,140,0.1);--green-border:rgba(61,214,140,0.2);
+  --red:#f06b6b;--red-bg:rgba(240,107,107,0.1);--red-border:rgba(240,107,107,0.2);
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,0.1);--amber-border:rgba(245,166,35,0.2);
+  --blue:#5ba3f5;--blue-bg:rgba(91,163,245,0.1);--blue-border:rgba(91,163,245,0.2);
+  --txt:#ddd9d0;--txt2:#8a8d99;--txt3:#454855;
+  --nav:68px;--hdr:60px;--r:14px;--r2:10px;
+}
+html,body{height:100%;background:#000;overflow:hidden;font-family:'Outfit',sans-serif;font-size:15px;color:var(--txt)}
+#app{
+  width:100%;max-width:430px;height:100vh;margin:0 auto;
+  display:flex;flex-direction:column;background:var(--bg);
+  position:relative;overflow:hidden;
+  box-shadow:0 0 80px rgba(0,0,0,0.8);
+}
+
+/* === HEADER === */
+.hdr{
+  height:var(--hdr);background:var(--s1);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 18px;
+  gap:12px;flex-shrink:0;position:relative;z-index:10;
+}
+.hdr-logo{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold3),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#07090f;font-weight:700;flex-shrink:0;
+}
+.hdr-text{flex:1;min-width:0}
+.hdr-co{font-size:11px;font-weight:600;color:var(--gold2);letter-spacing:0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-bldg{font-size:10px;color:var(--txt3);margin-top:1px;letter-spacing:0.3px}
+.hdr-btn{
+  width:34px;height:34px;border-radius:9px;background:var(--s2);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  color:var(--txt2);font-size:13px;cursor:pointer;transition:all .2s;flex-shrink:0;
+}
+.hdr-btn:active{background:var(--s3);transform:scale(.93)}
+
+/* === MONTH NAV === */
+.mnav{
+  height:46px;background:var(--s1);border-bottom:1px solid var(--border);
+  display:none;align-items:center;justify-content:space-between;
+  padding:0 16px;flex-shrink:0;
+}
+.mnav.show{display:flex}
+.mnav-btn{
+  width:30px;height:30px;border-radius:8px;background:var(--s2);
+  border:1px solid var(--border);color:var(--txt2);
+  display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;
+}
+.mnav-btn:active{background:var(--s3)}
+.mnav-lbl{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold2);font-weight:600}
+
+/* === SCREEN WRAPPER === */
+.screen-wrap{flex:1;position:relative;overflow:hidden}
+.screen{
+  height:100%;overflow-y:auto;overflow-x:hidden;
+  padding-bottom:20px;-webkit-overflow-scrolling:touch;
+  animation:fadeUp .22s ease both;
+}
+.screen::-webkit-scrollbar{display:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* === FAB === */
+.fab{
+  position:absolute;bottom:14px;right:14px;z-index:20;
+  width:50px;height:50px;border-radius:15px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold3));
+  display:none;align-items:center;justify-content:center;
+  font-size:18px;color:#07090f;
+  box-shadow:0 6px 20px rgba(200,168,75,.4),0 2px 8px rgba(0,0,0,.3);
+  cursor:pointer;transition:all .2s;
+}
+.fab.show{display:flex}
+.fab:active{transform:scale(.92)}
+
+/* === BOTTOM NAV === */
+.bnav{
+  height:var(--nav);background:var(--s1);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:0 4px;padding-bottom:env(safe-area-inset-bottom);
+  flex-shrink:0;position:relative;z-index:10;
+}
+.ni{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:4px;padding:8px 2px;cursor:pointer;border-radius:10px;
+  position:relative;transition:all .2s;
+}
+.ni.on .ni-ic{color:var(--gold)}
+.ni.on .ni-lb{color:var(--gold)}
+.ni.on::after{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:20px;height:2px;background:var(--gold);border-radius:0 0 3px 3px;
+}
+.ni-ic{font-size:19px;color:var(--txt3);transition:color .2s}
+.ni-lb{font-size:9px;color:var(--txt3);letter-spacing:.3px;font-weight:500;transition:color .2s}
+
+/* === CARDS & SECTIONS === */
+.sec{padding:14px 14px 0}
+.sec-ttl{
+  font-size:10px;letter-spacing:1.8px;text-transform:uppercase;
+  color:var(--txt3);margin-bottom:11px;font-weight:600;
+}
+.card{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+}
+.card-row{
+  display:flex;align-items:center;gap:11px;padding:13px 14px;
+  border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;
+}
+.card-row:last-child{border-bottom:none}
+.card-row:active{background:var(--s3)}
+
+/* === AVATAR === */
+.av{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(200,168,75,.18),rgba(200,168,75,.04));
+  border:1px solid rgba(200,168,75,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--gold);
+}
+.av.sup{
+  background:linear-gradient(135deg,rgba(91,163,245,.18),rgba(91,163,245,.04));
+  border-color:rgba(91,163,245,.25);color:var(--blue);
+}
+.av.sm{width:34px;height:34px;border-radius:9px;font-size:11px}
+.av.xs{width:28px;height:28px;border-radius:7px;font-size:10px}
+
+/* === BADGES === */
+.bdg{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:7px;font-size:10px;font-weight:600;letter-spacing:.3px;
+}
+.bdg-sup{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.bdg-cln{background:var(--gold-glow);color:var(--gold);border:1px solid rgba(200,168,75,.2)}
+.bdg-P{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.bdg-A{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.bdg-H{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.bdg-L{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+
+/* === DASHBOARD === */
+.dash-banner{
+  padding:18px 14px 16px;
+  background:linear-gradient(160deg,var(--s3) 0%,var(--bg) 70%);
+  position:relative;overflow:hidden;
+}
+.dash-banner::before{
+  content:'';position:absolute;top:-80px;right:-60px;
+  width:220px;height:220px;
+  background:radial-gradient(circle,rgba(200,168,75,.1) 0%,transparent 65%);
+  pointer-events:none;
+}
+.dash-banner::after{
+  content:'';position:absolute;bottom:-40px;left:-20px;
+  width:160px;height:160px;
+  background:radial-gradient(circle,rgba(61,214,140,.06) 0%,transparent 65%);
+  pointer-events:none;
+}
+.dash-eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--txt3);margin-bottom:3px}
+.dash-h{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold2);font-weight:700;line-height:1.1;margin-bottom:14px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat-c{
+  background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
+  padding:12px 13px;position:relative;overflow:hidden;
+}
+.stat-c::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+.stat-c.go::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.stat-c.gr::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.stat-c.re::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.stat-c.bl::before{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.stat-ic{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:9px;
+}
+.si-go{background:rgba(200,168,75,.14);color:var(--gold)}
+.si-gr{background:var(--green-bg);color:var(--green)}
+.si-re{background:var(--red-bg);color:var(--red)}
+.si-bl{background:var(--blue-bg);color:var(--blue)}
+.stat-lbl{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt3);margin-bottom:3px}
+.stat-val{font-size:21px;font-weight:700;line-height:1}
+.sv-go{color:var(--gold2)}.sv-gr{color:var(--green)}.sv-re{color:var(--red)}.sv-bl{color:var(--blue)}
+.stat-sub{font-size:10px;color:var(--txt3);margin-top:3px}
+
+/* Quick actions */
+.qa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.qa-btn{
+  background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
+  padding:13px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;
+  cursor:pointer;transition:all .2s;
+}
+.qa-btn:active{transform:scale(.94);background:var(--s3)}
+.qa-ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.qa-lbl{font-size:10px;color:var(--txt2);text-align:center;line-height:1.3;font-weight:500}
+
+/* Staff summary row */
+.staff-nm{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.staff-sub{font-size:11px;color:var(--txt3);margin-top:2px}
+
+/* === ATTENDANCE === */
+.att-legend{
+  display:flex;gap:10px;padding:9px 14px;
+  background:var(--s1);border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;
+}
+.att-legend::-webkit-scrollbar{display:none}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:.3px;flex-shrink:0}
+.att-strip{
+  display:flex;gap:7px;padding:10px 14px;
+  background:var(--s1);border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;
+}
+.att-strip::-webkit-scrollbar{display:none}
+.att-day{
+  flex-shrink:0;width:46px;padding:7px 4px;border-radius:11px;
+  background:var(--s2);border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;
+  transition:all .2s;
+}
+.att-day.sel{background:var(--gold);border-color:var(--gold)}
+.att-day.sun{opacity:.35;pointer-events:none}
+.att-day .dn{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);font-weight:600}
+.att-day .dd{font-size:16px;font-weight:700;color:var(--txt)}
+.att-day .dot{width:5px;height:5px;border-radius:50%}
+.att-day.sel .dn,.att-day.sel .dd{color:#07090f}
+.att-day.sel .dot{background:#07090f !important}
+
+/* Attendance mark row */
+.att-row{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border-bottom:1px solid var(--border);
+}
+.att-row:last-child{border-bottom:none}
+.att-btns{display:flex;gap:5px;margin-left:auto;flex-shrink:0}
+.att-btn{
+  width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
+  background:var(--s3);display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:var(--txt3);cursor:pointer;
+  transition:all .15s;letter-spacing:0;
+}
+.att-btn.sp{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.att-btn.sa{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.att-btn.sh{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.att-btn.sl{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+
+/* Monthly summary table */
+.att-sum-row{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border-bottom:1px solid var(--border);
+}
+.att-sum-row:last-child{border-bottom:none}
+.att-sum-stats{display:flex;gap:7px;margin-left:auto}
+.att-s{display:flex;flex-direction:column;align-items:center;min-width:26px}
+.att-sv{font-size:14px;font-weight:700}
+.att-sl{font-size:8px;letter-spacing:.5px;text-transform:uppercase;color:var(--txt3)}
+
+/* === SALARY === */
+.dl-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:9px;
+  padding:14px 14px 0;
+}
+.dl-btn{
+  padding:12px;border-radius:var(--r);border:1px solid var(--border);
+  background:var(--s2);display:flex;align-items:center;justify-content:center;
+  gap:8px;font-size:12px;font-weight:700;letter-spacing:.3px;
+  cursor:pointer;transition:all .2s;
+}
+.dl-btn:active{transform:scale(.96)}
+.dl-pdf{color:var(--red);border-color:var(--red-border)}
+.dl-pdf:active{background:var(--red-bg)}
+.dl-jpg{color:var(--blue);border-color:var(--blue-border)}
+.dl-jpg:active{background:var(--blue-bg)}
+
+.sal-card{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;margin-bottom:9px;
+}
+.sal-hdr{
+  display:flex;align-items:center;gap:11px;padding:13px 14px;
+  border-bottom:1px solid var(--border);
+  background:rgba(200,168,75,.03);
+}
+.sal-body{padding:10px 14px}
+.sal-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;
+}
+.sal-row:last-child{border-bottom:none}
+.sal-lbl{color:var(--txt2)}
+.sal-val{font-weight:600}
+.sal-ded{color:var(--red)}
+.sal-net{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 14px;
+  background:rgba(61,214,140,.05);
+  border-top:1px solid rgba(61,214,140,.12);
+}
+.sal-net-lbl{font-size:12px;color:var(--txt2);font-weight:500}
+.sal-net-val{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--green);font-weight:700}
+
+/* Paid toggle */
+.paid-toggle{
+  display:flex;align-items:center;gap:6px;
+  padding:0 14px 12px;
+}
+.toggle-track{
+  width:38px;height:20px;border-radius:10px;background:var(--s3);
+  border:1px solid var(--border2);position:relative;cursor:pointer;
+  transition:background .2s;
+}
+.toggle-track.on{background:linear-gradient(135deg,var(--green),rgba(61,214,140,.7))}
+.toggle-thumb{
+  position:absolute;top:2px;left:2px;width:14px;height:14px;
+  border-radius:7px;background:#fff;transition:left .2s;
+}
+.toggle-track.on .toggle-thumb{left:20px}
+.paid-lbl{font-size:11px;color:var(--txt2)}
+
+/* === FINANCE === */
+.ftabs{
+  display:flex;gap:8px;padding:12px 14px;
+  background:var(--s1);border-bottom:1px solid var(--border);
+}
+.ftab{
+  flex:1;padding:9px;border-radius:10px;background:var(--s2);
+  border:1px solid var(--border);text-align:center;font-size:12px;
+  font-weight:600;color:var(--txt2);cursor:pointer;transition:all .2s;
+}
+.ftab.on{
+  background:rgba(200,168,75,.1);
+  border-color:rgba(200,168,75,.25);color:var(--gold2);
+}
+.fin-item{
+  display:flex;align-items:center;gap:11px;
+  padding:13px 14px;border-bottom:1px solid var(--border);
+}
+.fin-item:last-child{border-bottom:none}
+.fin-ic{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;
+}
+.fi-adv{background:var(--red-bg);color:var(--red)}
+.fi-ded{background:var(--amber-bg);color:var(--amber)}
+.fin-info{flex:1;min-width:0}
+.fin-nm{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fin-meta{font-size:10px;color:var(--txt3);margin-top:2px}
+.fin-amt{font-size:15px;font-weight:700}
+.fin-amt.adv{color:var(--red)}
+.fin-amt.ded{color:var(--amber)}
+.del-btn{
+  width:27px;height:27px;border-radius:7px;
+  background:var(--red-bg);border:1px solid var(--red-border);
+  color:var(--red);display:flex;align-items:center;justify-content:center;
+  font-size:10px;cursor:pointer;flex-shrink:0;transition:all .2s;
+}
+.del-btn:active{transform:scale(.9)}
+.edt-btn{
+  width:27px;height:27px;border-radius:7px;
+  background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.22);
+  color:var(--gold);display:flex;align-items:center;justify-content:center;
+  font-size:10px;cursor:pointer;flex-shrink:0;transition:all .2s;margin-right:5px;
+}
+.edt-btn:active{transform:scale(.9)}
+.fin-actions{display:flex;align-items:center;flex-shrink:0}
+.name-edit-ic{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:5px;margin-left:5px;
+  background:rgba(200,168,75,.1);color:var(--gold);font-size:9px;
+  cursor:pointer;border:1px solid rgba(200,168,75,.18);
+  vertical-align:middle;transition:all .15s;flex-shrink:0;
+}
+.name-edit-ic:active{transform:scale(.88)}
+
+/* === STAFF PAGE === */
+.staff-pg-row{
+  display:flex;align-items:center;gap:11px;padding:13px 14px;
+  border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;
+}
+.staff-pg-row:last-child{border-bottom:none}
+.staff-pg-row:active{background:var(--s3)}
+.staff-pg-sal{text-align:right}
+.staff-pg-sal-val{font-size:15px;font-weight:700;color:var(--gold2)}
+.staff-pg-sal-lbl{font-size:10px;color:var(--txt3);margin-top:2px}
+
+/* Staff page action buttons */
+.staff-action-bar{
+  display:flex;gap:8px;padding:12px 14px;
+  background:var(--s1);border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.staff-add-btn{
+  flex:1;padding:10px;border-radius:11px;
+  background:linear-gradient(135deg,rgba(200,168,75,.15),rgba(200,168,75,.06));
+  border:1px solid rgba(200,168,75,.25);
+  color:var(--gold2);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  cursor:pointer;transition:all .2s;
+}
+.staff-add-btn:active{transform:scale(.96);background:rgba(200,168,75,.22)}
+
+/* Salary quick-update chip */
+.sal-edit-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 7px;border-radius:6px;
+  background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.2);
+  color:var(--gold);font-size:9px;font-weight:600;
+  cursor:pointer;transition:all .15s;vertical-align:middle;margin-left:4px;
+}
+.sal-edit-chip:active{transform:scale(.9)}
+
+/* Danger confirm btn */
+.btn-danger{
+  width:100%;padding:13px;border-radius:13px;margin-top:8px;
+  background:var(--red-bg);color:var(--red);
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;
+  border:1px solid var(--red-border);cursor:pointer;transition:all .2s;
+}
+.btn-danger:active{transform:scale(.97)}
+
+/* Install banner */
+.install-banner{
+  display:none;
+  align-items:center;gap:10px;
+  padding:10px 14px;
+  background:linear-gradient(135deg,rgba(200,168,75,.12),rgba(200,168,75,.04));
+  border-bottom:1px solid rgba(200,168,75,.18);
+  flex-shrink:0;
+  animation:fadeUp .3s ease both;
+}
+.install-banner.show{display:flex}
+.install-banner-text{flex:1;min-width:0}
+.install-banner-title{font-size:12px;font-weight:700;color:var(--gold2)}
+.install-banner-sub{font-size:10px;color:var(--txt3);margin-top:1px}
+.install-btn{
+  padding:7px 13px;border-radius:9px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  color:#07090f;font-size:11px;font-weight:700;border:none;
+  cursor:pointer;flex-shrink:0;white-space:nowrap;
+}
+.install-close{
+  width:22px;height:22px;border-radius:6px;
+  background:var(--s3);border:1px solid var(--border);
+  color:var(--txt3);font-size:9px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;flex-shrink:0;
+}
+
+/* === MODAL === */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  backdrop-filter:blur(6px);z-index:50;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal-box{
+  background:var(--s1);border:1px solid var(--border2);
+  border-radius:22px 22px 0 0;width:100%;max-width:430px;
+  padding:0 18px 24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.34,1.4,.64,1);
+  max-height:88vh;overflow-y:auto;
+}
+.modal-box::-webkit-scrollbar{display:none}
+.modal-bg.open .modal-box{transform:translateY(0)}
+.modal-handle{
+  width:34px;height:3px;border-radius:2px;
+  background:var(--border2);margin:14px auto 18px;
+}
+.modal-ttl{
+  font-family:'Cormorant Garamond',serif;font-size:22px;
+  color:var(--gold2);font-weight:700;margin-bottom:18px;
+}
+.fg{margin-bottom:13px}
+.flbl{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--txt3);margin-bottom:6px;font-weight:600}
+.finp,.fsel{
+  width:100%;background:var(--s2);border:1px solid var(--border);
+  border-radius:11px;padding:11px 13px;color:var(--txt);
+  font-family:'Outfit',sans-serif;font-size:14px;
+  outline:none;transition:border-color .2s;-webkit-appearance:none;
+}
+.finp:focus,.fsel:focus{border-color:var(--gold)}
+.fsel option{background:var(--s2)}
+.btn-pri{
+  width:100%;padding:13px;border-radius:13px;margin-top:4px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold3));
+  color:#07090f;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;
+  border:none;cursor:pointer;transition:all .2s;letter-spacing:.3px;
+}
+.btn-pri:active{transform:scale(.97)}
+.btn-sec{
+  width:100%;padding:13px;border-radius:13px;margin-top:8px;
+  background:var(--red-bg);color:var(--red);
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;
+  border:1px solid var(--red-border);cursor:pointer;transition:all .2s;
+}
+.btn-sec:active{transform:scale(.97)}
+
+/* === TOAST === */
+.toast{
+  position:fixed;top:calc(var(--hdr) + 10px);left:50%;
+  transform:translateX(-50%) translateY(-70px);
+  background:var(--s3);border:1px solid var(--border2);border-radius:11px;
+  padding:9px 16px;font-size:12px;font-weight:600;color:var(--txt);
+  z-index:100;transition:transform .28s cubic-bezier(.34,1.4,.64,1);
+  white-space:nowrap;display:flex;align-items:center;gap:7px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok .ti{color:var(--green)}.toast.err .ti{color:var(--red)}
+
+/* === LOADING === */
+.loading{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);
+  display:none;flex-direction:column;align-items:center;
+  justify-content:center;gap:12px;z-index:200;
+}
+.loading.show{display:flex}
+.spin{
+  width:42px;height:42px;border:2.5px solid var(--border2);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin .75s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-size:13px;color:var(--txt2)}
+
+/* Empty state */
+.empty{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:44px 20px;gap:10px;
+}
+.empty-ic{font-size:36px;color:var(--txt3);opacity:.4}
+.empty-tx{font-size:13px;color:var(--txt3);text-align:center;line-height:1.5}
+
+/* === HIDDEN REPORT === */
+#sal-report{position:fixed;left:-9999px;top:0;width:420px;font-family:'Outfit',sans-serif}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <div class="hdr">
+    <div class="hdr-logo">VE</div>
+    <div class="hdr-text">
+      <div class="hdr-co">Viratmas Environmental Services (M) Sdn Bhd</div>
+      <div class="hdr-bldg"><i class="fa-solid fa-building" style="font-size:8px;margin-right:3px"></i>Sirini Melawati</div>
+    </div>
+    <div class="hdr-btn" onclick="openAddStaff()"><i class="fa-solid fa-user-plus"></i></div>
+  </div>
+  <!-- Install Banner -->
+  <div class="install-banner" id="install-banner">
+    <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--gold3),var(--gold));display:flex;align-items:center;justify-content:center;font-size:14px;color:#07090f;font-weight:800;flex-shrink:0">VE</div>
+    <div class="install-banner-text">
+      <div class="install-banner-title">Install Viratmas Payroll</div>
+      <div class="install-banner-sub">Add to Home Screen for quick access</div>
+    </div>
+    <button class="install-btn" id="install-btn">Install</button>
+    <div class="install-close" onclick="dismissInstall()"><i class="fa-solid fa-xmark"></i></div>
+  </div>
+  <!-- Month nav -->
+  <div class="mnav" id="mnav">
+    <div class="mnav-btn" onclick="chgMonth(-1)"><i class="fa-solid fa-chevron-left"></i></div>
+    <div class="mnav-lbl" id="mnav-lbl">April 2026</div>
+    <div class="mnav-btn" onclick="chgMonth(1)"><i class="fa-solid fa-chevron-right"></i></div>
+  </div>
+  <!-- Screen -->
+  <div class="screen-wrap">
+    <div class="screen" id="screen"></div>
+    <div class="fab" id="fab" onclick="handleFab()"><i class="fa-solid fa-plus" id="fab-ic"></i></div>
+  </div>
+  <!-- Bottom nav -->
+  <div class="bnav">
+    <div class="ni on" id="ni-dashboard" onclick="nav('dashboard')"><i class="ni-ic fa-solid fa-house"></i><span class="ni-lb">Home</span></div>
+    <div class="ni" id="ni-attendance" onclick="nav('attendance')"><i class="ni-ic fa-solid fa-calendar-check"></i><span class="ni-lb">Attendance</span></div>
+    <div class="ni" id="ni-salary" onclick="nav('salary')"><i class="ni-ic fa-solid fa-money-bill-wave"></i><span class="ni-lb">Salary</span></div>
+    <div class="ni" id="ni-finance" onclick="nav('finance')"><i class="ni-ic fa-solid fa-wallet"></i><span class="ni-lb">Finance</span></div>
+    <div class="ni" id="ni-staff" onclick="nav('staff')"><i class="ni-ic fa-solid fa-users"></i><span class="ni-lb">Staff</span></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal-bg" onclick="closeMBg(event)">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-handle"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span class="ti" id="ti"></span><span id="tt"></span></div>
+
+<!-- Loading -->
+<div class="loading" id="loading"><div class="spin"></div><div class="load-txt" id="ltxt">Generating...</div></div>
+
+<!-- Hidden salary report -->
+<div id="sal-report"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+// ======================== DATA ========================
+const MO=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DA=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+let pg='dashboard', ftab='advance', selDay=null;
+let cm={y:2026,m:3}; // 0-indexed; April=3
+
+let staff=[
+  {id:1,name:'Mushtaq',role:'Supervisor',sal:2000,init:'M'},
+  {id:2,name:'Layar',role:'Cleaner',sal:1500,init:'La'},
+  {id:3,name:'Shani',role:'Cleaner',sal:1500,init:'Sh'},
+  {id:4,name:'Adnan',role:'Cleaner',sal:1500,init:'Ad'},
+  {id:5,name:'Ibrahim/Sohail',role:'Cleaner',sal:1500,init:'IS'},
+  {id:6,name:'Sulind',role:'Cleaner',sal:1500,init:'Su'},
+  {id:7,name:'Elika',role:'Cleaner',sal:1610,init:'El'},
+  {id:8,name:'Fauzi',role:'Cleaner',sal:1550,init:'Fa'},
+];
+let att={};    // att['YYYY-MM-DD'][staffId]='P'|'A'|'H'|'L'
+let advs=[
+  {id:1,sid:1,amt:300,date:'2026-04-15',note:'Monthly advance'},
+  {id:2,sid:2,amt:300,date:'2026-04-15',note:'Monthly advance'},
+  {id:3,sid:3,amt:300,date:'2026-04-15',note:'Monthly advance'},
+  {id:4,sid:4,amt:200,date:'2026-04-15',note:'Monthly advance'},
+  {id:7,sid:7,amt:350,date:'2026-04-15',note:'Monthly advance'},
+  {id:8,sid:8,amt:350,date:'2026-04-15',note:'Monthly advance'},
+];
+let deds=[];   // {id,sid,amt,reason,date}
+let paid={};   // paid['YYYY-MM'][staffId]=true/false
+let nid=200;
+
+// ===================== HELPERS =====================
+function mk(y,m){return`${y}-${String(m+1).padStart(2,'0')}`}
+function dk(y,m,d){return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+function dim(y,m){return new Date(y,m+1,0).getDate()}
+function wdays(y,m){let c=0,D=dim(y,m);for(let d=1;d<=D;d++){if(new Date(y,m,d).getDay()!==0)c++;}return c}
+function getAtt(y,m,d,sid){const k=dk(y,m,d);return att[k]?.[sid]||null}
+function setAtt(y,m,d,sid,st){
+  const k=dk(y,m,d);
+  if(!att[k])att[k]={};
+  att[k][sid]===st?delete att[k][sid]:att[k][sid]=st;
+  save();rerender();
+}
+function monthAtt(sid,y,m){
+  let P=0,A=0,H=0,L=0;
+  for(let d=1;d<=dim(y,m);d++){
+    if(new Date(y,m,d).getDay()===0)continue;
+    const s=getAtt(y,m,d,sid);
+    if(s==='P')P++;else if(s==='A')A++;else if(s==='H')H++;else if(s==='L')L++;
+  }
+  return{P,A,H,L};
+}
+function calcSal(sid,y,m){
+  const s=staff.find(x=>x.id===sid);if(!s)return null;
+  const wd=wdays(y,m);
+  const a=monthAtt(sid,y,m);
+  const rate=s.sal/wd;
+  const absDed=a.A*rate;
+  const hlfDed=a.H*rate*.5;
+  const mkey=mk(y,m);
+  const mAdv=advs.filter(x=>x.sid===sid&&x.date.startsWith(mkey));
+  const mDed=deds.filter(x=>x.sid===sid&&x.date.startsWith(mkey));
+  const tAdv=mAdv.reduce((s,x)=>s+x.amt,0);
+  const tDed=mDed.reduce((s,x)=>s+x.amt,0);
+  const net=Math.max(0,s.sal-absDed-hlfDed-tAdv-tDed);
+  return{base:s.sal,wd,P:a.P,A:a.A,H:a.H,L:a.L,rate,absDed,hlfDed,tAdv,tDed,net,advs:mAdv,deds:mDed};
+}
+
+// ===================== STORAGE =====================
+async function save(){
+  try{if(window.storage){
+    await window.storage.set('vm-att',JSON.stringify(att));
+    await window.storage.set('vm-advs',JSON.stringify(advs));
+    await window.storage.set('vm-deds',JSON.stringify(deds));
+    await window.storage.set('vm-staff',JSON.stringify(staff));
+    await window.storage.set('vm-paid',JSON.stringify(paid));
+    await window.storage.set('vm-nid',String(nid));
+  }}catch(e){}
+}
+async function load(){
+  try{if(window.storage){
+    const a=await window.storage.get('vm-att');if(a)att=JSON.parse(a.value);
+    const b=await window.storage.get('vm-advs');if(b)advs=JSON.parse(b.value);
+    const c=await window.storage.get('vm-deds');if(c)deds=JSON.parse(c.value);
+    const d=await window.storage.get('vm-staff');if(d)staff=JSON.parse(d.value);
+    const e=await window.storage.get('vm-paid');if(e)paid=JSON.parse(e.value);
+    const f=await window.storage.get('vm-nid');if(f)nid=parseInt(f.value);
+  }}catch(e){}
+}
+
+// ===================== NAVIGATION =====================
+function nav(p){
+  pg=p;
+  document.querySelectorAll('.ni').forEach(el=>el.classList.remove('on'));
+  document.getElementById(`ni-${p}`)?.classList.add('on');
+  const showM=['attendance','salary','finance'].includes(p);
+  document.getElementById('mnav').classList.toggle('show',showM);
+  const fab=document.getElementById('fab');
+  const fabIc=document.getElementById('fab-ic');
+  if(p==='attendance'){
+    fab.classList.add('show');
+    fabIc.className='fa-solid fa-calendar-check';
+    fab.title='Mark All Present';
+  }else if(p==='finance'){
+    fab.classList.add('show');
+    fabIc.className='fa-solid fa-plus';
+    fab.title='Add';
+  }else if(p==='staff'){
+    fab.classList.add('show');
+    fabIc.className='fa-solid fa-user-plus';
+    fab.title='Add Employee';
+  }else{
+    fab.classList.remove('show');
+  }
+  if(!selDay||new Date(selDay).getMonth()!==cm.m||new Date(selDay).getFullYear()!==cm.y){
+    selDay=new Date(cm.y,cm.m,1);
+  }
+  rerender();
+}
+function chgMonth(d){
+  cm.m+=d;
+  if(cm.m>11){cm.m=0;cm.y++;}
+  if(cm.m<0){cm.m=11;cm.y--;}
+  selDay=new Date(cm.y,cm.m,1);
+  document.getElementById('mnav-lbl').textContent=`${MO[cm.m]} ${cm.y}`;
+  rerender();
+}
+function rerender(){
+  const sc=document.getElementById('screen');
+  let html='';
+  if(pg==='dashboard')html=rDash();
+  else if(pg==='attendance')html=rAtt();
+  else if(pg==='salary')html=rSal();
+  else if(pg==='finance')html=rFin();
+  else if(pg==='staff')html=rStaff();
+  sc.innerHTML=html;
+  // Auto-scroll date strip
+  if(pg==='attendance'){
+    const sd=document.getElementById('att-strip');
+    const ac=document.querySelector('.att-day.sel');
+    if(sd&&ac)sd.scrollLeft=ac.offsetLeft-sd.clientWidth/2+ac.offsetWidth/2;
+  }
+}
+
+// ===================== DASHBOARD =====================
+function rDash(){
+  const{y,m}=cm,mkey=mk(y,m);
+  let tNet=0,tAdv=0,tDed=0;
+  staff.forEach(s=>{const c=calcSal(s.id,y,m);if(c){tNet+=c.net;tAdv+=c.tAdv;tDed+=c.tDed;}});
+  const tBase=staff.reduce((s,x)=>s+x.sal,0);
+  const today=new Date(),tk=dk(today.getFullYear(),today.getMonth(),today.getDate());
+  const todAtt=att[tk]||{};
+  const presT=Object.values(todAtt).filter(v=>v==='P'||v==='H').length;
+
+  return`
+  <div class="dash-banner">
+    <div class="dash-eyebrow">Payroll Overview</div>
+    <div class="dash-h">${MO[m]} ${y}</div>
+    <div class="stats-grid">
+      <div class="stat-c go">
+        <div class="stat-ic si-go"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-lbl">Total Staff</div>
+        <div class="stat-val sv-go">${staff.length}</div>
+        <div class="stat-sub">${presT} present today</div>
+      </div>
+      <div class="stat-c gr">
+        <div class="stat-ic si-gr"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+        <div class="stat-lbl">Net Payable</div>
+        <div class="stat-val sv-gr">RM ${tNet.toFixed(0)}</div>
+        <div class="stat-sub">base RM ${tBase}</div>
+      </div>
+      <div class="stat-c re">
+        <div class="stat-ic si-re"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+        <div class="stat-lbl">Advances</div>
+        <div class="stat-val sv-re">RM ${tAdv}</div>
+        <div class="stat-sub">this month</div>
+      </div>
+      <div class="stat-c bl">
+        <div class="stat-ic si-bl"><i class="fa-solid fa-scissors"></i></div>
+        <div class="stat-lbl">Deductions</div>
+        <div class="stat-val sv-bl">RM ${tDed.toFixed(0)}</div>
+        <div class="stat-sub">this month</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-ttl">Quick Actions</div>
+    <div class="qa-grid">
+      <div class="qa-btn" onclick="nav('attendance')">
+        <div class="qa-ic" style="background:var(--green-bg);color:var(--green)"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="qa-lbl">Mark Attendance</div>
+      </div>
+      <div class="qa-btn" onclick="nav('finance');ftab='advance';rerender()">
+        <div class="qa-ic" style="background:var(--red-bg);color:var(--red)"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+        <div class="qa-lbl">Add Advance</div>
+      </div>
+      <div class="qa-btn" onclick="nav('salary')">
+        <div class="qa-ic" style="background:var(--blue-bg);color:var(--blue)"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="qa-lbl">View Salary</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec" style="padding-bottom:14px">
+    <div class="sec-ttl">Staff Overview</div>
+    <div class="card">
+      ${staff.map(s=>{
+        const c=calcSal(s.id,y,m);
+        const a=monthAtt(s.id,y,m);
+        const net=c?c.net.toFixed(0):s.sal;
+        const adv=c&&c.tAdv>0;
+        const pkey=mkey+'_'+s.id;
+        const isPaid=paid[pkey];
+        return`
+        <div class="card-row" onclick="nav('salary')">
+          <div class="av${s.role==='Supervisor'?' sup':''}">${s.init}</div>
+          <div style="flex:1;min-width:0">
+            <div class="staff-nm">${s.name}</div>
+            <div class="staff-sub">${a.P}P · ${a.A}A · ${a.H}H${isPaid?' · <span style="color:var(--green)">✓ Paid</span>':''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:700;font-size:14px;color:var(--green)">RM ${net}</div>
+            ${adv?`<div style="font-size:10px;color:var(--red)">−RM ${c.tAdv} adv</div>`:`<div style="font-size:10px;color:var(--txt3)">no advance</div>`}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+// ===================== ATTENDANCE =====================
+function rAtt(){
+  const{y,m}=cm;
+  const days=dim(y,m);
+  const sd=selDay?.getDate()||1;
+
+  let strip='';
+  for(let d=1;d<=days;d++){
+    const dow=new Date(y,m,d).getDay();
+    const isSun=dow===0;
+    const isSel=d===sd;
+    const k=dk(y,m,d);
+    const hasRec=att[k]&&Object.keys(att[k]).length>0;
+    let dotClr=hasRec?(isSel?'#07090f':'var(--gold)'):'transparent';
+    strip+=`
+    <div class="att-day${isSel?' sel':''}${isSun?' sun':''}" onclick="selDate(${d})" id="ad${d}">
+      <span class="dn">${DA[dow]}</span>
+      <span class="dd">${d}</span>
+      <div class="dot" style="background:${dotClr}"></div>
+    </div>`;
+  }
+
+  const dow=new Date(y,m,sd).getDay();
+  const isSun=dow===0;
+
+  let rows='';
+  if(isSun){
+    rows=`<div class="empty"><div class="empty-ic"><i class="fa-solid fa-umbrella-beach"></i></div><div class="empty-tx">Sunday – Rest Day<br><span style="font-size:11px">No attendance required</span></div></div>`;
+  }else{
+    staff.forEach(s=>{
+      const cur=getAtt(y,m,sd,s.id);
+      rows+=`
+      <div class="att-row">
+        <div class="av sm${s.role==='Supervisor'?' sup':''}">${s.init}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px">
+            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</span>
+            <span class="name-edit-ic" onclick="openQuickRename(${s.id})"><i class="fa-solid fa-pen"></i></span>
+          </div>
+          <div style="font-size:10px;color:var(--txt3)">${s.role}</div>
+        </div>
+        <div class="att-btns">
+          <div class="att-btn${cur==='P'?' sp':''}" onclick="setAtt(${y},${m},${sd},${s.id},'P')">P</div>
+          <div class="att-btn${cur==='A'?' sa':''}" onclick="setAtt(${y},${m},${sd},${s.id},'A')">A</div>
+          <div class="att-btn${cur==='H'?' sh':''}" onclick="setAtt(${y},${m},${sd},${s.id},'H')">H</div>
+          <div class="att-btn${cur==='L'?' sl':''}" onclick="setAtt(${y},${m},${sd},${s.id},'L')">L</div>
+        </div>
+      </div>`;
+    });
+  }
+
+  let sumRows='';
+  staff.forEach(s=>{
+    const a=monthAtt(s.id,y,m);
+    sumRows+=`
+    <div class="att-sum-row">
+      <div class="av xs${s.role==='Supervisor'?' sup':''}">${s.init}</div>
+      <div style="flex:1;min-width:0;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
+      <div class="att-sum-stats">
+        <div class="att-s"><div class="att-sv" style="color:var(--green)">${a.P}</div><div class="att-sl">P</div></div>
+        <div class="att-s"><div class="att-sv" style="color:var(--red)">${a.A}</div><div class="att-sl">A</div></div>
+        <div class="att-s"><div class="att-sv" style="color:var(--amber)">${a.H}</div><div class="att-sl">H</div></div>
+        <div class="att-s"><div class="att-sv" style="color:var(--blue)">${a.L}</div><div class="att-sl">L</div></div>
+      </div>
+    </div>`;
+  });
+
+  return`
+  <div class="att-legend">
+    <div class="leg-item"><span style="color:var(--green)">●</span><span style="color:var(--txt2)">Present</span></div>
+    <div class="leg-item"><span style="color:var(--red)">●</span><span style="color:var(--txt2)">Absent</span></div>
+    <div class="leg-item"><span style="color:var(--amber)">●</span><span style="color:var(--txt2)">Half Day</span></div>
+    <div class="leg-item"><span style="color:var(--blue)">●</span><span style="color:var(--txt2)">Leave</span></div>
+  </div>
+  <div class="att-strip" id="att-strip">${strip}</div>
+  <div class="sec" style="padding-top:13px">
+    <div class="sec-ttl">${DA[new Date(y,m,sd).getDay()]} ${sd} ${MO[m]} — Mark Attendance</div>
+    <div class="card">${rows}</div>
+  </div>
+  <div class="sec" style="padding-bottom:14px">
+    <div class="sec-ttl">Monthly Summary</div>
+    <div class="card">${sumRows}</div>
+  </div>`;
+}
+function selDate(d){selDay=new Date(cm.y,cm.m,d);rerender();}
+
+// ===================== SALARY =====================
+function rSal(){
+  const{y,m}=cm,mkey=mk(y,m);
+  let cards='';
+  staff.forEach(s=>{
+    const c=calcSal(s.id,y,m);
+    if(!c)return;
+    const pkey=mkey+'_'+s.id;
+    const isPaid=paid[pkey]||false;
+    const advRows=c.advs.map(a=>`
+      <div class="sal-row">
+        <span class="sal-lbl"><i class="fa-solid fa-circle" style="font-size:5px;margin-right:4px;color:var(--txt3)"></i>Advance (${a.date.slice(8)} ${MO[m].slice(0,3)})</span>
+        <span class="sal-val sal-ded">−RM ${a.amt}</span>
+      </div>`).join('');
+    const dedRows=c.deds.map(d=>`
+      <div class="sal-row">
+        <span class="sal-lbl"><i class="fa-solid fa-circle" style="font-size:5px;margin-right:4px;color:var(--txt3)"></i>${d.reason}</span>
+        <span class="sal-val sal-ded">−RM ${d.amt}</span>
+      </div>`).join('');
+    const absRow=c.A>0?`<div class="sal-row"><span class="sal-lbl">Absent (${c.A}d × RM ${c.rate.toFixed(1)})</span><span class="sal-val sal-ded">−RM ${c.absDed.toFixed(0)}</span></div>`:'';
+    const hlfRow=c.H>0?`<div class="sal-row"><span class="sal-lbl">Half Day (${c.H}d × RM ${(c.rate*.5).toFixed(1)})</span><span class="sal-val sal-ded">−RM ${c.hlfDed.toFixed(0)}</span></div>`:'';
+    const noDeduct=(c.A===0&&c.H===0&&c.tAdv===0&&c.tDed===0);
+    cards+=`
+    <div class="sal-card">
+      <div class="sal-hdr">
+        <div class="av${s.role==='Supervisor'?' sup':''}">${s.init}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:15px">${s.name}</div>
+          <div style="font-size:10px;color:var(--txt3);margin-top:2px">${s.role} · ${c.P}P ${c.A}A ${c.H}H ${c.L}L</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:var(--txt3)">Base Salary</div>
+          <div style="font-weight:700;font-size:14px;color:var(--gold2)">RM ${c.base} <span class="sal-edit-chip" onclick="openUpdateSalary(${s.id})"><i class="fa-solid fa-pen"></i></span></div>
+        </div>
+      </div>
+      <div class="sal-body">
+        ${absRow}${hlfRow}${advRows}${dedRows}
+        ${noDeduct?`<div style="font-size:11px;color:var(--txt3);padding:4px 0;text-align:center"><i class="fa-solid fa-circle-check" style="color:var(--green);margin-right:4px"></i>No deductions this month</div>`:''}
+      </div>
+      <div class="sal-net">
+        <div class="sal-net-lbl">Net Salary</div>
+        <div class="sal-net-val">RM ${c.net.toFixed(0)}</div>
+      </div>
+      <div class="paid-toggle">
+        <div class="toggle-track${isPaid?' on':''}" onclick="togglePaid('${pkey}')"><div class="toggle-thumb"></div></div>
+        <span class="paid-lbl">${isPaid?'<span style="color:var(--green)"><i class="fa-solid fa-circle-check" style="margin-right:3px"></i>Salary Paid</span>':'Mark as Paid'}</span>
+      </div>
+    </div>`;
+  });
+
+  return`
+  <div class="dl-row">
+    <div class="dl-btn dl-pdf" onclick="expPDF()"><i class="fa-solid fa-file-pdf"></i> PDF Report</div>
+    <div class="dl-btn dl-jpg" onclick="expJPG()"><i class="fa-regular fa-image"></i> Save as JPG</div>
+  </div>
+  <div style="padding:10px 14px 14px">${cards}</div>`;
+}
+function togglePaid(pkey){
+  paid[pkey]=!paid[pkey];
+  save();rerender();
+  toast(paid[pkey]?'Marked as Paid ✓':'Marked as Unpaid','ok');
+}
+
+// ===================== FINANCE =====================
+function rFin(){
+  const{y,m}=cm,mkey=mk(y,m);
+  const mAdvs=advs.filter(a=>a.date.startsWith(mkey)).sort((a,b)=>a.date<b.date?-1:1);
+  const mDeds=deds.filter(d=>d.date.startsWith(mkey)).sort((a,b)=>a.date<b.date?-1:1);
+  const tA=mAdvs.reduce((s,x)=>s+x.amt,0);
+  const tD=mDeds.reduce((s,x)=>s+x.amt,0);
+
+  const aItems=mAdvs.length?mAdvs.map(a=>{
+    const s=staff.find(x=>x.id===a.sid);
+    return`
+    <div class="fin-item">
+      <div class="fin-ic fi-adv"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+      <div class="fin-info">
+        <div class="fin-nm" style="display:flex;align-items:center;gap:6px">
+          <span>${s?.name||'Unknown'}</span>
+          <span class="name-edit-ic" onclick="openQuickRename(${s?.id})"><i class="fa-solid fa-pen"></i></span>
+        </div>
+        <div class="fin-meta">${a.date}${a.note?' · '+a.note:''}</div>
+      </div>
+      <div class="fin-amt adv">RM ${a.amt}</div>
+      <div class="fin-actions">
+        <div class="edt-btn" onclick="openEditAdv(${a.id})" title="Edit"><i class="fa-solid fa-pen-to-square"></i></div>
+        <div class="del-btn" onclick="delAdv(${a.id})" title="Delete"><i class="fa-solid fa-trash"></i></div>
+      </div>
+    </div>`;
+  }).join(''):`<div class="empty"><div class="empty-ic"><i class="fa-solid fa-hand-holding-dollar"></i></div><div class="empty-tx">No advances recorded<br>for ${MO[m]}</div></div>`;
+
+  const dItems=mDeds.length?mDeds.map(d=>{
+    const s=staff.find(x=>x.id===d.sid);
+    return`
+    <div class="fin-item">
+      <div class="fin-ic fi-ded"><i class="fa-solid fa-scissors"></i></div>
+      <div class="fin-info">
+        <div class="fin-nm" style="display:flex;align-items:center;gap:6px">
+          <span>${s?.name||'Unknown'}</span>
+          <span class="name-edit-ic" onclick="openQuickRename(${s?.id})"><i class="fa-solid fa-pen"></i></span>
+        </div>
+        <div class="fin-meta">${d.date} · ${d.reason}</div>
+      </div>
+      <div class="fin-amt ded">RM ${d.amt}</div>
+      <div class="fin-actions">
+        <div class="edt-btn" onclick="openEditDed(${d.id})" title="Edit"><i class="fa-solid fa-pen-to-square"></i></div>
+        <div class="del-btn" onclick="delDed(${d.id})" title="Delete"><i class="fa-solid fa-trash"></i></div>
+      </div>
+    </div>`;
+  }).join(''):`<div class="empty"><div class="empty-ic"><i class="fa-solid fa-scissors"></i></div><div class="empty-tx">No deductions recorded<br>for ${MO[m]}</div></div>`;
+
+  return`
+  <div class="ftabs">
+    <div class="ftab${ftab==='advance'?' on':''}" onclick="ftab='advance';rerender()">
+      <i class="fa-solid fa-hand-holding-dollar" style="margin-right:5px"></i>Advances
+      ${tA?`<span style="background:var(--red-bg);color:var(--red);font-size:9px;padding:1px 5px;border-radius:5px;margin-left:4px">RM ${tA}</span>`:''}
+    </div>
+    <div class="ftab${ftab==='deduction'?' on':''}" onclick="ftab='deduction';rerender()">
+      <i class="fa-solid fa-scissors" style="margin-right:5px"></i>Deductions
+      ${tD?`<span style="background:var(--amber-bg);color:var(--amber);font-size:9px;padding:1px 5px;border-radius:5px;margin-left:4px">RM ${tD.toFixed(0)}</span>`:''}
+    </div>
+  </div>
+  <div style="padding:12px 14px">
+    <div class="card">${ftab==='advance'?aItems:dItems}</div>
+  </div>`;
+}
+function delAdv(id){advs=advs.filter(a=>a.id!==id);save();rerender();toast('Advance deleted','ok')}
+function delDed(id){deds=deds.filter(d=>d.id!==id);save();rerender();toast('Deduction deleted','ok')}
+
+function openEditAdv(id){
+  const a=advs.find(x=>x.id===id);if(!a)return;
+  const opts=staff.map(s=>`<option value="${s.id}"${s.id===a.sid?' selected':''}>${s.name}</option>`).join('');
+  openModal(`
+    <div class="fg"><div class="flbl">Staff Member</div><select class="fsel" id="eas">${opts}</select></div>
+    <div class="fg"><div class="flbl">Amount (RM)</div><input type="number" class="finp" id="eaa" value="${a.amt}" inputmode="numeric"></div>
+    <div class="fg"><div class="flbl">Date</div><input type="date" class="finp" id="ead" value="${a.date}"></div>
+    <div class="fg"><div class="flbl">Note (optional)</div><input type="text" class="finp" id="ean" value="${a.note||''}"></div>
+    <button class="btn-pri" onclick="saveEditAdv(${id})"><i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Update Advance</button>
+    <button class="btn-sec" onclick="delAdv(${id});closeModal()"><i class="fa-solid fa-trash" style="margin-right:6px"></i>Delete Advance</button>
+  `,`<i class="fa-solid fa-pen-to-square" style="color:var(--gold);margin-right:8px"></i>Edit Advance`);
+}
+function saveEditAdv(id){
+  const a=advs.find(x=>x.id===id);if(!a)return;
+  a.sid=parseInt(document.getElementById('eas').value);
+  a.amt=parseFloat(document.getElementById('eaa').value)||a.amt;
+  a.date=document.getElementById('ead').value||a.date;
+  a.note=document.getElementById('ean').value;
+  if(a.amt<=0||!a.date){toast('Please fill all fields','err');return;}
+  save();closeModal();rerender();toast('Advance updated!','ok');
+}
+
+function openEditDed(id){
+  const d=deds.find(x=>x.id===id);if(!d)return;
+  const opts=staff.map(s=>`<option value="${s.id}"${s.id===d.sid?' selected':''}>${s.name}</option>`).join('');
+  openModal(`
+    <div class="fg"><div class="flbl">Staff Member</div><select class="fsel" id="eds">${opts}</select></div>
+    <div class="fg"><div class="flbl">Amount (RM)</div><input type="number" class="finp" id="eda" value="${d.amt}" inputmode="numeric"></div>
+    <div class="fg"><div class="flbl">Reason</div><input type="text" class="finp" id="edr" value="${d.reason}"></div>
+    <div class="fg"><div class="flbl">Date</div><input type="date" class="finp" id="edd" value="${d.date}"></div>
+    <button class="btn-pri" onclick="saveEditDed(${id})"><i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Update Deduction</button>
+    <button class="btn-sec" onclick="delDed(${id});closeModal()"><i class="fa-solid fa-trash" style="margin-right:6px"></i>Delete Deduction</button>
+  `,`<i class="fa-solid fa-pen-to-square" style="color:var(--gold);margin-right:8px"></i>Edit Deduction`);
+}
+function saveEditDed(id){
+  const d=deds.find(x=>x.id===id);if(!d)return;
+  d.sid=parseInt(document.getElementById('eds').value);
+  d.amt=parseFloat(document.getElementById('eda').value)||d.amt;
+  d.reason=document.getElementById('edr').value||d.reason;
+  d.date=document.getElementById('edd').value||d.date;
+  if(d.amt<=0||!d.reason||!d.date){toast('Please fill all fields','err');return;}
+  save();closeModal();rerender();toast('Deduction updated!','ok');
+}
+
+function openQuickRename(sid){
+  const s=staff.find(x=>x.id===sid);if(!s)return;
+  openModal(`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px;background:var(--s2);border:1px solid var(--border);border-radius:11px">
+      <div class="av${s.role==='Supervisor'?' sup':''}" style="flex-shrink:0">${s.init}</div>
+      <div>
+        <div style="font-size:13px;font-weight:600">${s.name}</div>
+        <div style="font-size:11px;color:var(--txt3)">${s.role}</div>
+      </div>
+    </div>
+    <div class="fg"><div class="flbl">New Name</div><input type="text" class="finp" id="qn" value="${s.name}" placeholder="Enter full name"></div>
+    <div class="fg"><div class="flbl">Avatar Initials</div><input type="text" class="finp" id="qi" value="${s.init}" maxlength="3" placeholder="2–3 letters"></div>
+    <button class="btn-pri" onclick="saveQuickRename(${sid})"><i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Save Name</button>
+  `,`<i class="fa-solid fa-user-pen" style="color:var(--gold);margin-right:8px"></i>Edit Name`);
+}
+function saveQuickRename(sid){
+  const s=staff.find(x=>x.id===sid);if(!s)return;
+  const nm=document.getElementById('qn').value.trim();
+  const ini=document.getElementById('qi').value.trim();
+  if(!nm){toast('Name cannot be empty','err');return;}
+  s.name=nm;
+  if(ini)s.init=ini.toUpperCase();
+  save();closeModal();rerender();toast('Name updated!','ok');
+}
+
+// ===================== STAFF =====================
+function rStaff(){
+  const totalSal=staff.reduce((s,x)=>s+x.sal,0);
+  const supervisors=staff.filter(s=>s.role==='Supervisor').length;
+  const cleaners=staff.filter(s=>s.role==='Cleaner').length;
+  return`
+  <div style="padding:12px 14px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;gap:9px">
+    <div style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:11px;padding:11px 13px;text-align:center">
+      <div style="font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt3);margin-bottom:3px">Total Staff</div>
+      <div style="font-size:20px;font-weight:700;color:var(--gold2)">${staff.length}</div>
+    </div>
+    <div style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:11px;padding:11px 13px;text-align:center">
+      <div style="font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt3);margin-bottom:3px">Monthly Payroll</div>
+      <div style="font-size:18px;font-weight:700;color:var(--green)">RM ${totalSal}</div>
+    </div>
+    <div style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:11px;padding:11px 13px;text-align:center">
+      <div style="font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt3);margin-bottom:3px">Roles</div>
+      <div style="font-size:13px;font-weight:600;color:var(--txt);margin-top:4px"><span style="color:var(--blue)">${supervisors}S</span> · <span style="color:var(--gold)">${cleaners}C</span></div>
+    </div>
+  </div>
+  <div style="padding:10px 14px 4px 14px">
+    <div class="staff-add-btn" onclick="openAddStaff()">
+      <i class="fa-solid fa-user-plus"></i> Add New Employee
+    </div>
+  </div>
+  <div class="sec" style="padding-bottom:14px;padding-top:10px">
+    <div class="sec-ttl">All Staff Members (${staff.length})</div>
+    <div class="card">
+      ${staff.map(s=>`
+      <div class="staff-pg-row">
+        <div class="av${s.role==='Supervisor'?' sup':''}">${s.init}</div>
+        <div style="flex:1;min-width:0">
+          <div class="staff-nm">${s.name}</div>
+          <div style="margin-top:3px;display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+            <span class="bdg bdg-${s.role==='Supervisor'?'sup':'cln'}">${s.role}</span>
+          </div>
+        </div>
+        <div style="text-align:right;margin-right:4px">
+          <div style="font-size:15px;font-weight:700;color:var(--gold2)">RM ${s.sal}</div>
+          <div style="font-size:10px;color:var(--txt3)">base salary</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+          <div class="edt-btn" onclick="openEditStaff(${s.id})" title="Edit"><i class="fa-solid fa-pen-to-square"></i></div>
+          <div class="del-btn" onclick="confirmRemoveStaff(${s.id})" title="Remove"><i class="fa-solid fa-trash"></i></div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`
+}
+
+// ===================== FAB =====================
+function handleFab(){
+  if(pg==='attendance'){
+    const{y,m}=cm;
+    const d=selDay?.getDate()||1;
+    const dow=new Date(y,m,d).getDay();
+    if(dow===0){toast('Sunday – rest day!','err');return;}
+    const k=dk(y,m,d);
+    if(!att[k])att[k]={};
+    staff.forEach(s=>{att[k][s.id]='P';});
+    save();rerender();toast('All marked Present!','ok');
+  }else if(pg==='finance'){
+    ftab==='advance'?openAddAdv():openAddDed();
+  }else if(pg==='staff'){
+    openAddStaff();
+  }
+}
+
+// ===================== MODALS =====================
+function openModal(html,ttl){
+  document.getElementById('modal-body').innerHTML=`<div class="modal-ttl">${ttl}</div>${html}`;
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-bg').classList.remove('open')}
+function closeMBg(e){if(e.target===document.getElementById('modal-bg'))closeModal()}
+
+function openAddAdv(){
+  const{y,m}=cm;
+  const def=`${y}-${String(m+1).padStart(2,'0')}-15`;
+  const opts=staff.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  openModal(`
+    <div class="fg"><div class="flbl">Staff Member</div><select class="fsel" id="as">${opts}</select></div>
+    <div class="fg"><div class="flbl">Amount (RM)</div><input type="number" class="finp" id="aa" placeholder="e.g. 300" inputmode="numeric"></div>
+    <div class="fg"><div class="flbl">Date</div><input type="date" class="finp" id="ad" value="${def}"></div>
+    <div class="fg"><div class="flbl">Note (optional)</div><input type="text" class="finp" id="an" placeholder="e.g. Monthly advance"></div>
+    <button class="btn-pri" onclick="saveAdv()"><i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Save Advance</button>
+  `,`<i class="fa-solid fa-hand-holding-dollar" style="color:var(--red);margin-right:8px"></i>Add Advance`);
+}
+function saveAdv(){
+  const sid=parseInt(document.getElementById('as').value);
+  const amt=parseFloat(document.getElementById('aa').value);
+  const date=document.getElementById('ad').value;
+  const note=document.getElementById('an').value;
+  if(!amt||amt<=0||!date){toast('Please fill all fields','err');return;}
+  advs.push({id:nid++,sid,amt,date,note});
+  save();closeModal();rerender();toast('Advance saved!','ok');
+}
+
+function openAddDed(){
+  const{y,m}=cm;
+  const def=`${y}-${String(m+1).padStart(2,'0')}-01`;
+  const opts=staff.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  openModal(`
+    <div class="fg"><div class="flbl">Staff Member</div><select class="fsel" id="ds">${opts}</select></div>
+    <div class="fg"><div class="flbl">Amount (RM)</div><input type="number" class="finp" id="da" placeholder="e.g. 50" inputmode="numeric"></div>
+    <div class="fg"><div class="flbl">Reason</div><input type="text" class="finp" id="dr" placeholder="e.g. Late arrival, Damage, EPF..."></div>
+    <div class="fg"><div class="flbl">Date</div><input type="date" class="finp" id="dd" value="${def}"></div>
+    <button class="btn-pri" onclick="saveDed()"><i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Save Deduction</button>
+  `,`<i class="fa-solid fa-scissors" style="color:var(--amber);margin-right:8px"></i>Add Deduction`);
+}
+function saveDed(){
+  const sid=parseInt(document.getElementById('ds').value);
+  const amt=parseFloat(document.getElementById('da').value);
+  const reason=document.getElementById('dr').value;
+  const date=document.getElementById('dd').value;
+  if(!amt||amt<=0||!reason||!date){toast('Please fill all fields','err');return;}
+  deds.push({id:nid++,sid,amt,reason,date});
+  save();closeModal();rerender();toast('Deduction saved!','ok');
+}
+
+function openEditStaff(id){
+  const s=staff.find(x=>x.id===id);if(!s)return;
+  openModal(`
+    <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s2);border:1px solid var(--border);border-radius:11px;margin-bottom:16px">
+      <div class="av${s.role==='Supervisor'?' sup':''}" style="flex-shrink:0;width:44px;height:44px;border-radius:13px;font-size:15px">${s.init}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700">${s.name}</div>
+        <div style="font-size:11px;color:var(--txt3);margin-top:1px">${s.role} · RM ${s.sal}/month</div>
+      </div>
+    </div>
+    <div class="fg"><div class="flbl">Full Name</div><input type="text" class="finp" id="en" value="${s.name}"></div>
+    <div class="fg"><div class="flbl">Role</div>
+      <select class="fsel" id="er">
+        <option value="Supervisor"${s.role==='Supervisor'?' selected':''}>Supervisor</option>
+        <option value="Cleaner"${s.role==='Cleaner'?' selected':''}>Cleaner</option>
+        <option value="Driver"${s.role==='Driver'?' selected':''}>Driver</option>
+        <option value="Admin"${s.role==='Admin'?' selected':''}>Admin</option>
+      </select>
+    </div>
+    <div class="fg"><div class="flbl">Base Salary (RM)</div>
+      <div style="position:relative">
+        <input type="number" class="finp" id="es" value="${s.sal}" inputmode="numeric">
+      </div>
+      <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
+        ${[1500,1600,1700,1800,2000].map(v=>`<div onclick="document.getElementById('es').value=${v}" style="padding:5px 10px;background:var(--s2);border:1px solid var(--border);border-radius:7px;font-size:11px;font-weight:600;color:var(--txt2);cursor:pointer">RM ${v}</div>`).join('')}
+      </div>
+    </div>
+    <div class="fg"><div class="flbl">Avatar Initials</div><input type="text" class="finp" id="ei" value="${s.init}" maxlength="3"></div>
+    <button class="btn-pri" onclick="saveEdit(${id})"><i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Save Changes</button>
+    <button class="btn-danger" onclick="closeModal();setTimeout(()=>confirmRemoveStaff(${id}),200)"><i class="fa-solid fa-user-minus" style="margin-right:6px"></i>Remove Employee</button>
+  `,`<i class="fa-solid fa-user-pen" style="color:var(--gold);margin-right:8px"></i>Edit Employee`);
+}
+function saveEdit(id){
+  const s=staff.find(x=>x.id===id);if(!s)return;
+  s.name=document.getElementById('en').value;
+  s.role=document.getElementById('er').value;
+  s.sal=parseFloat(document.getElementById('es').value)||s.sal;
+  s.init=document.getElementById('ei').value||s.init;
+  save();closeModal();rerender();toast('Staff updated!','ok');
+}
+function confirmRemoveStaff(id){
+  const s=staff.find(x=>x.id===id);if(!s)return;
+  openModal(`
+    <div style="background:var(--red-bg);border:1px solid var(--red-border);border-radius:12px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+      <i class="fa-solid fa-triangle-exclamation" style="color:var(--red);font-size:20px;flex-shrink:0"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--red)">Remove Employee</div>
+        <div style="font-size:11px;color:var(--txt2);margin-top:2px">This will permanently remove <strong>${s.name}</strong> from the system. Attendance and finance records will remain.</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s2);border:1px solid var(--border);border-radius:11px;margin-bottom:16px">
+      <div class="av${s.role==='Supervisor'?' sup':''}" style="flex-shrink:0">${s.init}</div>
+      <div>
+        <div style="font-size:13px;font-weight:600">${s.name}</div>
+        <div style="font-size:11px;color:var(--txt3)">${s.role} · RM ${s.sal}/month</div>
+      </div>
+    </div>
+    <button class="btn-danger" onclick="removeStaff(${id})"><i class="fa-solid fa-trash" style="margin-right:6px"></i>Yes, Remove Employee</button>
+    <button class="btn-pri" style="margin-top:8px" onclick="closeModal()">Cancel</button>
+  `,`<i class="fa-solid fa-user-minus" style="color:var(--red);margin-right:8px"></i>Confirm Removal`);
+}
+function removeStaff(id){
+  staff=staff.filter(s=>s.id!==id);
+  save();closeModal();rerender();toast('Employee removed','ok');
+}
+
+function openUpdateSalary(id){
+  const s=staff.find(x=>x.id===id);if(!s)return;
+  openModal(`
+    <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--s2);border:1px solid var(--border);border-radius:11px;margin-bottom:16px">
+      <div class="av${s.role==='Supervisor'?' sup':''}" style="flex-shrink:0">${s.init}</div>
+      <div>
+        <div style="font-size:13px;font-weight:600">${s.name}</div>
+        <div style="font-size:11px;color:var(--txt3)">${s.role}</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:10px;color:var(--txt3)">Current</div>
+        <div style="font-size:16px;font-weight:700;color:var(--gold2)">RM ${s.sal}</div>
+      </div>
+    </div>
+    <div class="fg"><div class="flbl">New Base Salary (RM)</div><input type="number" class="finp" id="us" placeholder="e.g. 1600" value="${s.sal}" inputmode="numeric"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px">
+      ${[1500,1600,1700,1800,2000,2500].map(v=>`<div onclick="document.getElementById('us').value=${v}" style="padding:9px;background:var(--s2);border:1px solid var(--border);border-radius:9px;text-align:center;font-size:12px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .15s" onmousedown="this.style.background='var(--s3)'">RM ${v}</div>`).join('')}
+    </div>
+    <button class="btn-pri" onclick="saveUpdateSalary(${id})"><i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Update Salary</button>
+  `,`<i class="fa-solid fa-money-bill-trend-up" style="color:var(--green);margin-right:8px"></i>Update Salary`);
+}
+function saveUpdateSalary(id){
+  const s=staff.find(x=>x.id===id);if(!s)return;
+  const newSal=parseFloat(document.getElementById('us').value);
+  if(!newSal||newSal<=0){toast('Please enter a valid salary','err');return;}
+  const old=s.sal;
+  s.sal=newSal;
+  save();closeModal();rerender();
+  toast(`Salary updated: RM ${old} → RM ${newSal}`,'ok');
+}
+
+function openAddStaff(){
+  openModal(`
+    <div class="fg"><div class="flbl">Full Name</div><input type="text" class="finp" id="nn" placeholder="e.g. Ahmad bin Ali"></div>
+    <div class="fg"><div class="flbl">Role</div>
+      <select class="fsel" id="nr">
+        <option value="Cleaner">Cleaner</option>
+        <option value="Supervisor">Supervisor</option>
+        <option value="Driver">Driver</option>
+        <option value="Admin">Admin</option>
+      </select>
+    </div>
+    <div class="fg"><div class="flbl">Base Salary (RM)</div>
+      <input type="number" class="finp" id="ns" placeholder="e.g. 1500" inputmode="numeric">
+      <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
+        ${[1500,1600,1700,1800,2000,2500].map(v=>`<div onclick="document.getElementById('ns').value=${v}" style="padding:5px 10px;background:var(--s2);border:1px solid var(--border);border-radius:7px;font-size:11px;font-weight:600;color:var(--txt2);cursor:pointer">RM ${v}</div>`).join('')}
+      </div>
+    </div>
+    <div class="fg"><div class="flbl">Avatar Initials <span style="font-size:9px;color:var(--txt3)">(auto-generated if empty)</span></div><input type="text" class="finp" id="ni" maxlength="3" placeholder="e.g. AB"></div>
+    <button class="btn-pri" onclick="addStaff()"><i class="fa-solid fa-user-plus" style="margin-right:6px"></i>Add Employee</button>
+  `,`<i class="fa-solid fa-user-plus" style="color:var(--gold);margin-right:8px"></i>Add New Employee`);
+}
+function addStaff(){
+  const name=document.getElementById('nn').value.trim();
+  const role=document.getElementById('nr').value;
+  const sal=parseFloat(document.getElementById('ns').value);
+  const customInit=document.getElementById('ni').value.trim();
+  if(!name||!sal){toast('Please fill name and salary','err');return;}
+  const init=customInit?customInit.toUpperCase():name.split(/[\s/]/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  staff.push({id:nid++,name,role,sal,init});
+  save();closeModal();rerender();toast(`${name} added!`,'ok');
+}
+
+// ===================== EXPORT PDF =====================
+async function expPDF(){
+  const{y,m}=cm;
+  showLoad('Generating PDF...');
+  await new Promise(r=>setTimeout(r,100));
+  try{
+    const{jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+    const W=210,pw=14;
+
+    // Background
+    doc.setFillColor(7,9,15);doc.rect(0,0,W,297,'F');
+
+    // Header gradient bar
+    doc.setFillColor(13,16,24);doc.rect(0,0,W,38,'F');
+    doc.setFillColor(200,168,75);doc.rect(0,0,W,2,'F');
+
+    // Company name
+    doc.setTextColor(240,205,121);doc.setFontSize(11);doc.setFont('helvetica','bold');
+    doc.text('VIRATMAS ENVIRONMENTAL SERVICES (M) SDN BHD',W/2,12,{align:'center'});
+    doc.setTextColor(138,141,153);doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.text('Sirini Melawati Building',W/2,18,{align:'center'});
+    doc.setTextColor(221,217,208);doc.setFontSize(13);doc.setFont('helvetica','bold');
+    doc.text(`SALARY REPORT — ${MO[m].toUpperCase()} ${y}`,W/2,27,{align:'center'});
+    doc.setTextColor(138,141,153);doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+    doc.text(`Generated: ${new Date().toLocaleDateString('en-MY',{day:'numeric',month:'long',year:'numeric'})}`,W/2,33,{align:'center'});
+
+    // Summary boxes
+    let tNet=0,tAdv=0,tDed=0;
+    staff.forEach(s=>{const c=calcSal(s.id,y,m);if(c){tNet+=c.net;tAdv+=c.tAdv;tDed+=c.tDed;}});
+    const tBase=staff.reduce((s,x)=>s+x.sal,0);
+
+    const boxes=[
+      {lbl:'TOTAL STAFF',val:String(staff.length),col:[200,168,75]},
+      {lbl:'TOTAL BASE',val:`RM ${tBase}`,col:[221,217,208]},
+      {lbl:'ADVANCES',val:`RM ${tAdv}`,col:[240,107,107]},
+      {lbl:'NET PAYABLE',val:`RM ${tNet.toFixed(0)}`,col:[61,214,140]},
+    ];
+    const bw=(W-pw*2-9*3)/4;
+    boxes.forEach((b,i)=>{
+      const bx=pw+i*(bw+9),by=42;
+      doc.setFillColor(18,21,30);doc.rect(bx,by,bw,18,'F');
+      doc.setDrawColor(...b.col);doc.setLineWidth(.5);doc.rect(bx,by,bw,18,'S');
+      doc.setTextColor(138,141,153);doc.setFontSize(7);doc.setFont('helvetica','bold');
+      doc.text(b.lbl,bx+bw/2,by+6,{align:'center'});
+      doc.setTextColor(...b.col);doc.setFontSize(10);doc.setFont('helvetica','bold');
+      doc.text(b.val,bx+bw/2,by+13.5,{align:'center'});
+    });
+
+    // Table header
+    let ty=68;
+    doc.setFillColor(20,23,32);doc.rect(pw,ty,W-pw*2,8,'F');
+    doc.setFillColor(200,168,75);doc.rect(pw,ty,W-pw*2,.4,'F');
+    const cols=[pw+3,78,98,118,150,182];
+    const hdrs=['EMPLOYEE / ROLE','BASE','ABSENT','ADV','DEDUCT','NET SALARY'];
+    const aligns=['left','right','right','right','right','right'];
+    doc.setTextColor(138,141,153);doc.setFontSize(7.5);doc.setFont('helvetica','bold');
+    hdrs.forEach((h,i)=>{
+      doc.text(h,aligns[i]==='right'?cols[i]+14:cols[i],ty+5.5,{align:aligns[i]});
+    });
+    ty+=10;
+
+    // Staff rows
+    staff.forEach((s,i)=>{
+      const c=calcSal(s.id,y,m);if(!c)return;
+      if(i%2===0){doc.setFillColor(13,15,20);doc.rect(pw,ty-1,W-pw*2,11,'F');}
+      doc.setTextColor(221,217,208);doc.setFontSize(9);doc.setFont('helvetica','bold');
+      doc.text(s.name,cols[0],ty+4.5);
+      doc.setTextColor(138,141,153);doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+      doc.text(s.role,cols[0],ty+8.5);
+      doc.setTextColor(200,168,75);doc.setFontSize(9);
+      doc.text(`${c.base}`,cols[1]+14,ty+5.5,{align:'right'});
+      doc.setTextColor(c.A>0?[240,107,107]:[69,72,85]);
+      doc.text(c.A>0?`-${c.absDed.toFixed(0)}`:'—',cols[2]+14,ty+5.5,{align:'right'});
+      doc.setTextColor(c.tAdv>0?[240,107,107]:[69,72,85]);
+      doc.text(c.tAdv>0?`-${c.tAdv}`:'—',cols[3]+14,ty+5.5,{align:'right'});
+      doc.setTextColor(c.tDed>0?[245,166,35]:[69,72,85]);
+      doc.text(c.tDed>0?`-${c.tDed.toFixed(0)}`:'—',cols[4]+14,ty+5.5,{align:'right'});
+      doc.setTextColor(61,214,140);doc.setFont('helvetica','bold');doc.setFontSize(9.5);
+      doc.text(`RM ${c.net.toFixed(0)}`,cols[5]+14,ty+5.5,{align:'right'});
+
+      // Attendance dots
+      const attTxt=`${c.P}P · ${c.A}A · ${c.H}H · ${c.L}L`;
+      doc.setTextColor(69,72,85);doc.setFontSize(7);doc.setFont('helvetica','normal');
+      doc.text(attTxt,78,ty+8.5);
+      ty+=12;
+    });
+
+    // Total row
+    doc.setFillColor(24,28,40);doc.rect(pw,ty-1,W-pw*2,11,'F');
+    doc.setDrawColor(200,168,75);doc.setLineWidth(.3);doc.line(pw,ty-1,W-pw,ty-1);
+    doc.setTextColor(240,205,121);doc.setFontSize(10);doc.setFont('helvetica','bold');
+    doc.text('TOTAL',cols[0],ty+6);
+    doc.setTextColor(240,107,107);doc.text(`-${tAdv}`,cols[3]+14,ty+6,{align:'right'});
+    doc.setTextColor(245,166,35);doc.text(`-${tDed.toFixed(0)}`,cols[4]+14,ty+6,{align:'right'});
+    doc.setTextColor(61,214,140);doc.setFontSize(11);doc.text(`RM ${tNet.toFixed(0)}`,cols[5]+14,ty+6,{align:'right'});
+
+    // Footer
+    doc.setTextColor(69,72,85);doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+    doc.text('CONFIDENTIAL — Internal use only · Viratmas Environmental Services (M) Sdn Bhd',W/2,287,{align:'center'});
+    doc.setDrawColor(69,72,85);doc.setLineWidth(.2);doc.line(pw,283,W-pw,283);
+
+    doc.save(`Viratmas_Salary_${MO[m]}_${y}.pdf`);
+    toast('PDF downloaded!','ok');
+  }catch(e){console.error(e);toast('PDF failed','err');}
+  hideLoad();
+}
+
+// ===================== EXPORT JPG =====================
+async function expJPG(){
+  const{y,m}=cm;
+  showLoad('Generating image...');
+  await new Promise(r=>setTimeout(r,150));
+  try{
+    const mkey=mk(y,m);
+    let tNet=0,tAdv=0;
+    staff.forEach(s=>{const c=calcSal(s.id,y,m);if(c){tNet+=c.net;tAdv+=c.tAdv;}});
+    const tBase=staff.reduce((s,x)=>s+x.sal,0);
+
+    const rpt=document.getElementById('sal-report');
+    rpt.style.cssText='position:fixed;left:-9999px;top:0;width:440px;background:#07090f;overflow:hidden;';
+    rpt.innerHTML=`
+    <div style="font-family:Outfit,sans-serif;background:#07090f;width:440px;overflow:hidden">
+      <div style="background:#0d1018;padding:20px 24px 18px;border-bottom:1px solid rgba(200,168,75,.2)">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#8a6a1e,#c8a84b);display:flex;align-items:center;justify-content:center;font-weight:800;color:#07090f;font-size:14px">VE</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#f0cd79">Viratmas Environmental Services (M) Sdn Bhd</div>
+            <div style="font-size:10px;color:#454855;margin-top:2px">Sirini Melawati · Salary Report · ${MO[m]} ${y}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+          ${[['Staff',staff.length+'','#f0cd79'],['Base','RM '+tBase,'#ddd9d0'],['Advances','RM '+tAdv,'#f06b6b'],['Net Pay','RM '+tNet.toFixed(0),'#3dd68c']].map(([l,v,c])=>`
+          <div style="background:#12151f;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#454855;margin-bottom:4px">${l}</div>
+            <div style="font-size:18px;font-weight:800;color:${c}">${v}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 72px 80px 90px;padding:8px 20px;background:#1e2330;border-bottom:1px solid rgba(255,255,255,.05)">
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#454855">Employee</div>
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#454855;text-align:right">Base</div>
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#454855;text-align:right">Advance</div>
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#454855;text-align:right">Net Salary</div>
+      </div>
+      ${staff.map((s,i)=>{
+        const c=calcSal(s.id,y,m);if(!c)return'';
+        return`
+        <div style="display:grid;grid-template-columns:1fr 72px 80px 90px;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.04);background:${i%2===0?'#07090f':'#0d1018'}">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#ddd9d0">${s.name}</div>
+            <div style="font-size:10px;color:#454855;margin-top:2px">${s.role} · ${c.P}P ${c.A}A ${c.H}H</div>
+          </div>
+          <div style="text-align:right;align-self:center;font-size:12px;font-weight:500;color:#8a8d99">RM ${c.base}</div>
+          <div style="text-align:right;align-self:center;font-size:13px;font-weight:700;color:${c.tAdv>0?'#f06b6b':'#454855'}">${c.tAdv>0?'−RM '+c.tAdv:'—'}</div>
+          <div style="text-align:right;align-self:center;font-size:15px;font-weight:800;color:#3dd68c">RM ${c.net.toFixed(0)}</div>
+        </div>`;
+      }).join('')}
+      <div style="display:grid;grid-template-columns:1fr 72px 80px 90px;padding:14px 20px;background:#1e2330;border-top:1px solid rgba(200,168,75,.2)">
+        <div style="font-size:14px;font-weight:800;color:#f0cd79">TOTAL</div>
+        <div></div>
+        <div style="text-align:right;font-size:14px;font-weight:800;color:#f06b6b">−RM ${tAdv}</div>
+        <div style="text-align:right;font-size:16px;font-weight:800;color:#3dd68c">RM ${tNet.toFixed(0)}</div>
+      </div>
+      <div style="padding:10px 20px;text-align:center;border-top:1px solid rgba(255,255,255,.05)">
+        <div style="font-size:10px;color:#454855">Generated ${new Date().toLocaleDateString('en-MY')} · Viratmas Environmental Services (M) Sdn Bhd · CONFIDENTIAL</div>
+      </div>
+    </div>`;
+
+    await new Promise(r=>setTimeout(r,300));
+    const canvas=await html2canvas(rpt.firstElementChild,{scale:2.5,backgroundColor:'#07090f',logging:false,useCORS:true});
+    const link=document.createElement('a');
+    link.download=`Viratmas_Salary_${MO[m]}_${y}.jpg`;
+    link.href=canvas.toDataURL('image/jpeg',.95);
+    link.click();
+    toast('Image saved!','ok');
+  }catch(e){console.error(e);toast('Export failed','err');}
+  hideLoad();
+}
+
+// ===================== TOAST =====================
+let _tt;
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  const ic=document.getElementById('ti');
+  const tx=document.getElementById('tt');
+  ic.innerHTML=type==='ok'?'<i class="fa-solid fa-circle-check"></i>':'<i class="fa-solid fa-circle-exclamation"></i>';
+  tx.textContent=msg;
+  el.className=`toast ${type} show`;
+  clearTimeout(_tt);
+  _tt=setTimeout(()=>el.classList.remove('show'),2800);
+}
+function showLoad(t){document.getElementById('ltxt').textContent=t;document.getElementById('loading').classList.add('show')}
+function hideLoad(){document.getElementById('loading').classList.remove('show')}
+
+// ===================== PWA INSTALL =====================
+let _deferredPrompt=null;
+
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  _deferredPrompt=e;
+  // Show banner if not dismissed
+  if(!sessionStorage.getItem('install-dismissed')){
+    document.getElementById('install-banner').classList.add('show');
+  }
+});
+
+document.getElementById('install-btn').addEventListener('click',async()=>{
+  if(!_deferredPrompt)return;
+  _deferredPrompt.prompt();
+  const{outcome}=await _deferredPrompt.userChoice;
+  if(outcome==='accepted'){
+    toast('App installed! 🎉','ok');
+    document.getElementById('install-banner').classList.remove('show');
+  }
+  _deferredPrompt=null;
+});
+
+function dismissInstall(){
+  sessionStorage.setItem('install-dismissed','1');
+  document.getElementById('install-banner').classList.remove('show');
+}
+
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('install-banner').classList.remove('show');
+  _deferredPrompt=null;
+});
+
+// Register service worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
+// ===================== INIT =====================
+async function init(){
+  await load();
+  document.getElementById('mnav-lbl').textContent=`${MO[cm.m]} ${cm.y}`;
+  selDay=new Date(cm.y,cm.m,13);
+  nav('dashboard');
+}
+init();
+</script>
+</body>
+</html>
